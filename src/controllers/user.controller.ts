@@ -33,5 +33,11 @@ export class UserController {
         return response.status(HttpStatus.OK).json(token)
     }
 
+    @Post('/youtube/getChannel')
+    async getChannel(@Res() response, @Req() req,) {
+        const channel = await this.userServerice.getChannel();
+        return response.status(HttpStatus.OK).json(channel);
+    }
+
 
 }

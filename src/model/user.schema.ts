@@ -11,6 +11,10 @@ export class User {
     @Prop({ required: true })
     password: string
 
+    @Prop({ required: false })
+    refresh_token: string
+
+
     @Prop({ default: Date.now() })
     createdDate?: Date
 }
