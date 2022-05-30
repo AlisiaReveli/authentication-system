@@ -53,13 +53,18 @@ export class UserController {
         await this.userServerice.getLongLivedAccessToken();
     }
 
-      @Get('/instagram/profile')
+    @Get('/instagram/profile')
     async getProfile(@Res() response) {
-          await this.userServerice.getInstagramProfile(response);
+        await this.userServerice.getInstagramProfile(response);
+    }
+
+    @Get('/instagram/refreshToken')
+    async getInstagramRefreshToken(@Res() response) {
+        await this.userServerice.getInstagramRefreshToken();
     }
 
 
-    
+
 
 
 
