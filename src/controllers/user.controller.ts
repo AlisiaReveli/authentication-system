@@ -58,14 +58,8 @@ export class UserController {
         await this.userServerice.getInstagramProfile(response);
     }
 
-    @Get('/instagram/refreshToken')
-    async getInstagramRefreshToken(@Res() response) {
-        await this.userServerice.getInstagramRefreshToken();
-    }
 
-
-
-
+ 
 
 
 }
