@@ -53,14 +53,9 @@ export class UserService {
     //youtube part
 
     async createToken() {
-        // const credentials = {
-        //     client_id: process.env.client_id,
-        //     client_secret: process.env.client_secret,
-        //     redirect_uris: process.env.redirect_uris,
-        // }
 
-        var clientSecret = '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';
-        var clientId = '283565823112-23p4l874m77edb958ptuqro0cb68864i.apps.googleusercontent.com';
+        var clientSecret = process.env.ClientSecret;
+        var clientId = process.env.ClientId;
         var redirectUrl = 'http://127.0.0.1:5500';
 
         //the oauth2Client object is used to make API calls
@@ -90,22 +85,21 @@ export class UserService {
                 //refresh token can be used to generate a new access token
                 //refresh token never expires I recommend storing it in a database
                 console.log(token);
-                token;
+                return token;
             });
         });
 
     }
 
-    async tokenInfo(access_token) {
-        var clientSecret = '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';
-        var clientId = '283565823112-23p4l874m77edb958ptuqro0cb68864i.apps.googleusercontent.com';
+    async tokenInfo(access_token, refresh_token) {
+        var clientSecret = process.env.ClientSecret;
+        var clientId = process.env.ClientId;
         var redirectUrl = 'http://127.0.0.1:5500';
 
         var oauth2Client = new OAuth2(clientSecret, clientId, redirectUrl);
 
-        const refresh_token = "1//099trSATzQyBnCgYIARAAGAkSNwF-L9Irtm-TQIhDouaYFzpwpD2MIriPD1Pj6InyBcmZb71gKaODRqRbOsedm4FVE4Ab0_sv8R8";
         //info for current access token
-        const tokenInfo = await oauth2Client.getTokenInfo('ya29.a0ARrdaM-j8Owm5d7MZZMeG5Go109PQxmytqnpvdHGhQ_bjZynZyj6EFfsntx6UhcL54jETFp7caJbkLOBQ5Tq94L5kkHfRdDSuYnwqzLBm84MU5PzzKJXofv3lPnkyGFQ2kKQAP41CZmxme9e6vqtALncuIxX');
+        const tokenInfo = await oauth2Client.getTokenInfo(access_token);
 
         //current access token expiration time
         const expireDate = new Date(tokenInfo.expiry_date);
@@ -141,7 +135,9 @@ export class UserService {
         //check the last used access token info to see if it is still valid
         //the access token might be saved in a database or redis and is related to a user
         //if not, tokenInfo generates a new access token
-        var auth = await this.tokenInfo('ya29.a0ARrdaM-j8Owm5d7MZZMeG5Go109PQxmytqnpvdHGhQ_bjZynZyj6EFfsntx6UhcL54jETFp7caJbkLOBQ5Tq94L5kkHfRdDSuYnwqzLBm84MU5PzzKJXofv3lPnkyGFQ2kKQAP41CZmxme9e6vqtALncuIxX');
+        let access_token, refresh_token;
+        //this values should be found from database or redis
+        var auth = await this.tokenInfo(access_token, refresh_token);
 
 
         await axios({
@@ -160,7 +156,7 @@ export class UserService {
 
             service.channels.list({
                 //auth is the api key for youtube api v3
-                auth: 'AIzaSyDbgFZPmKEunOmw65-YkqNA0ljcnJ1CSr4',
+                auth: process.env.YouTubeAPI,
                 part: ['snippet,contentDetails,statistics'],
                 id: [channelId]
             }, function (err, response) {
@@ -186,10 +182,8 @@ export class UserService {
 
     //instagram part
     async createTokenInsta(@Res() response) {
-        // return response.send(
-        //     `<a href='https://api.instagram.com/oauth/authorize?client_id=515401393656330&redirect_uri=https://httpstat.us/200&scope=user_media,user_profile&response_type=code'> Connect to Instagram </a>`
-        // );
-        const url = 'https://api.instagram.com/oauth/authorize?client_id=515401393656330&redirect_uri=https://httpstat.us/200&scope=user_media,user_profile&response_type=code'
+      
+        const url = `https://api.instagram.com/oauth/authorize?client_id=${process.env.ClientId}&redirect_uri=https://httpstat.us/200&scope=user_media,user_profile&response_type=code`
         console.log('Authorize this app by visiting this url: ', `${url}`);
         var rl = readline.createInterface({
             input: process.stdin,
@@ -204,8 +198,8 @@ export class UserService {
 
     async getShortLivedAccessToken() {
         var bodyFormData = new FormData();
-        bodyFormData.append('client_id', '515401393656330');
-        bodyFormData.append('client_secret', '23ea79f89e5447920eb4d1ad39088976');
+        bodyFormData.append('client_id', process.env.ClientId);
+        bodyFormData.append('client_secret',    process.env.ClientSecret);
         bodyFormData.append('redirect_uri', "https://httpstat.us/200");
         bodyFormData.append('code', 'AQDWwxjGUHb5aeothIMBh9-wm-FWYwhpUwXLCdEwN8LrOZ2k28lk37VrxO3Q2Y8tzhQhZiUdFnVLEZP4YHUad6r8Rm-De1nGVdVnJ4HNJdfdl06xk6lrCzKd9qVEkLFDuljQjm04SXIlloZMJ7TsJHVnZSUH47Wde--F6rvFnrAXYrwCPd5PZoMliwJwu2_NvapVwrrOfqPoEeyKcPMJp2I2W1pNbPxAF1SfqkCcS61x_w');
         bodyFormData.append('grant_type', "authorization_code");
@@ -231,8 +225,8 @@ export class UserService {
             await axios.get("https://graph.instagram.com/access_token", {
                 params: {
                     grant_type: "ig_exchange_token",
-                    client_secret: "23ea79f89e5447920eb4d1ad39088976",
-                    access_token: "IGQVJWaTI2aXhvUTBQa0hoYlF0QTIxZAENGZAHcxVFRRd3ZAlaEdaY000dHZAwUUhZAZAVg0UHBsZAC1LYjRkWU1MQklQUmJZAeDVtbkc2N012Q3JkaUdoX01IS2R2RUR1aUZASV0JES21hdVFaZAmdaSjQxWUxYUVJpeEc4cUZApcVdF",
+                    client_secret: process.env.ClientSecretInsta,
+                    access_token: 'accesstoken',
                 },
             }).then((response) => {
                 // getting the response.
@@ -262,7 +256,7 @@ export class UserService {
             await axios.get("https://graph.instagram.com/me", {
                 params: {
                     fields: "id,username,media_count,account_type",
-                    access_token: "IGQVJWTWdkZAVdISVduM3k4T3BqZAFdob2ZAvXzlJd2VWdGRSRmM0a1BHeTgzVDVTTUhJb1psQlBaVG00YUlxRjZAPc29vTWwtZAG5JXzFOLXBoOHVDZA1hxVUNDeGJHbDc2ZAFdWMkVUZAVJn",
+                    access_token: "access token",
                 },
                 headers: {
                     host: "graph.instagram.com",
